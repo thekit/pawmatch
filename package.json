@@ -7,7 +7,13 @@
     "start": "node server.js",
     "dev": "node server.js"
   },
-  "keywords": ["pet", "adoption", "shelter", "matching", "pwa"],
+  "keywords": [
+    "pet",
+    "adoption",
+    "shelter",
+    "matching",
+    "pwa"
+  ],
   "author": "Your Name",
   "license": "MIT",
   "dependencies": {

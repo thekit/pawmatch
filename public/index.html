@@ -687,7 +687,10 @@
                 if (availablePets.length === 0) {
                     generateMatches();
                 }
-                loadNextPet();
+                // Small delay to ensure DOM is ready and pets are loaded
+                setTimeout(() => {
+                    loadNextPet();
+                }, 100);
             } else if (screenId === 'favorites-screen') {
                 document.querySelector('.nav-btn[onclick*="favorites-screen"]').classList.add('active');
             } else if (screenId === 'welcome-screen') {
@@ -786,6 +789,7 @@
             }).sort((a, b) => b.matchScore - a.matchScore);
             
             currentPetIndex = 0;
+            console.log('Generated matches:', availablePets.length, 'pets available');
         }
 
         function calculateCompatibilityScore(pet, preferences) {
@@ -819,6 +823,9 @@
 
         function loadNextPet() {
             const petStack = document.getElementById('pet-stack');
+            
+            // Debug logging
+            console.log('Loading pet:', currentPetIndex, 'of', availablePets.length);
             
             if (currentPetIndex >= availablePets.length) {
                 // No more pets

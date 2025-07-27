@@ -441,7 +441,7 @@
                 <h1 class="hero-title">Swipe Right for Your Soul Pet</h1>
                 <p class="hero-subtitle">Transform pet adoption into a magical journey. Our smart matching connects you with shelter pets who need loving homes.</p>
                 <button class="btn" onclick="startQuiz()">Find My Perfect Pet</button>
-                <button class="btn secondary" onclick="showScreen('browse-screen')">Browse All Pets</button>
+                <button class="btn secondary" id="browse-all-btn" onclick="showScreen('browse-screen')" style="display: none;">Browse All Pets</button>
             </div>
         </div>
 
@@ -762,6 +762,8 @@
             // Simulate matching process
             setTimeout(() => {
                 generateMatches();
+                // Enable browse all pets button now that quiz is complete
+                document.getElementById('browse-all-btn').style.display = 'block';
                 showScreen('browse-screen');
                 loadNextPet();
             }, 2000);

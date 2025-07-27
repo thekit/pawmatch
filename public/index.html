@@ -683,6 +683,11 @@
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
             if (screenId === 'browse-screen') {
                 document.querySelector('.nav-btn[onclick*="browse-screen"]').classList.add('active');
+                // Ensure pets are available for browsing
+                if (availablePets.length === 0) {
+                    generateMatches();
+                }
+                loadNextPet();
             } else if (screenId === 'favorites-screen') {
                 document.querySelector('.nav-btn[onclick*="favorites-screen"]').classList.add('active');
             } else if (screenId === 'welcome-screen') {
@@ -772,9 +777,11 @@
         }
 
         function generateMatches() {
-            // Score each pet based on user preferences
+            // Score each pet based on user preferences (if available)
             availablePets = mockPets.map(pet => {
-                const score = calculateCompatibilityScore(pet, userPreferences);
+                const score = Object.keys(userPreferences).length > 0 
+                    ? calculateCompatibilityScore(pet, userPreferences)
+                    : Math.floor(Math.random() * 30) + 70; // Random score 70-99 if no preferences
                 return { ...pet, matchScore: score };
             }).sort((a, b) => b.matchScore - a.matchScore);
             

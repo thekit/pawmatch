@@ -1,0 +1,1144 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PawMatch - Find Your Perfect Shelter Companion</title>
+    <meta name="description" content="Swipe right for your soul pet! Find your perfect shelter companion with our intelligent matching system.">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#FF6B6B">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="PawMatch">
+    
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/png" sizes="32x32" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐾</text></svg>">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #FF6B6B;
+            --secondary-color: #4ECDC4;
+            --accent-color: #45B7D1;
+            --warm-orange: #FFA726;
+            --soft-green: #66BB6A;
+            --text-dark: #2C3E50;
+            --text-light: #7F8C8D;
+            --background: #F8F9FA;
+            --card-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            --border-radius: 16px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, var(--background) 0%, #E8F4FD 100%);
+            color: var(--text-dark);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: white;
+            box-shadow: 0 0 50px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--warm-orange));
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .tagline {
+            font-size: 1rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .screen {
+            display: none;
+            padding: 20px;
+            min-height: calc(100vh - 100px);
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .welcome-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .hero-emoji {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .hero-title {
+            font-size: 2rem;
+            color: var(--text-dark);
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            margin-bottom: 40px;
+            line-height: 1.5;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--warm-orange));
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--card-shadow);
+            min-height: 44px;
+            width: 100%;
+            margin-bottom: 12px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(255,107,107,0.3);
+        }
+
+        .btn.secondary {
+            background: white;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .quiz-question {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .question-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-dark);
+        }
+
+        .quiz-options {
+            display: grid;
+            gap: 12px;
+        }
+
+        .quiz-option {
+            background: #F8F9FA;
+            border: 2px solid #E9ECEF;
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quiz-option:hover {
+            border-color: var(--primary-color);
+            background: #FFF5F5;
+        }
+
+        .quiz-option.selected {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .pet-card-container {
+            position: relative;
+            height: 600px;
+            margin-bottom: 20px;
+        }
+
+        .pet-card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            cursor: grab;
+            transition: transform 0.3s ease;
+            overflow: hidden;
+        }
+
+        .pet-card.dragging {
+            cursor: grabbing;
+            z-index: 10;
+        }
+
+        .pet-image {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+        }
+
+        .pet-info {
+            padding: 20px;
+        }
+
+        .pet-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .pet-details {
+            color: var(--text-light);
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+        }
+
+        .match-score {
+            background: linear-gradient(135deg, var(--soft-green), var(--secondary-color));
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+
+        .pet-traits {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .trait-tag {
+            background: #E3F2FD;
+            color: var(--accent-color);
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .action-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--card-shadow);
+            min-height: 44px;
+        }
+
+        .pass-btn {
+            background: #FFE0E0;
+            color: #FF5252;
+        }
+
+        .like-btn {
+            background: #E8F5E8;
+            color: var(--soft-green);
+        }
+
+        .super-like-btn {
+            background: #E3F2FD;
+            color: var(--accent-color);
+        }
+
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .favorites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 16px;
+        }
+
+        .favorite-card {
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .favorite-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .favorite-image {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+
+        .favorite-info {
+            padding: 12px;
+        }
+
+        .favorite-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 400px;
+            background: white;
+            padding: 12px 20px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        .nav-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-light);
+        }
+
+        .empty-emoji {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                max-width: 100%;
+            }
+            
+            .hero-title {
+                font-size: 1.7rem;
+            }
+            
+            .pet-card-container {
+                height: 550px;
+            }
+        }
+
+        /* Accessibility improvements */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">🐾 PawMatch</div>
+            <div class="tagline">Find Your Perfect Shelter Companion</div>
+        </header>
+
+        <!-- Welcome Screen -->
+        <div id="welcome-screen" class="screen active">
+            <div class="welcome-screen">
+                <span class="hero-emoji">❤️</span>
+                <h1 class="hero-title">Swipe Right for Your Soul Pet</h1>
+                <p class="hero-subtitle">Transform pet adoption into a magical journey. Our smart matching connects you with shelter pets who need loving homes.</p>
+                <button class="btn" onclick="startQuiz()">Find My Perfect Pet</button>
+                <button class="btn secondary" onclick="showScreen('browse-screen')">Browse All Pets</button>
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="screen">
+            <div id="quiz-container"></div>
+            <button class="btn" id="quiz-next-btn" onclick="nextQuestion()" style="display: none;">Next Question</button>
+            <button class="btn" id="quiz-finish-btn" onclick="finishQuiz()" style="display: none;">Find My Matches!</button>
+        </div>
+
+        <!-- Loading Screen -->
+        <div id="loading-screen" class="screen">
+            <div class="loading">
+                <div class="spinner"></div>
+                <h2>Finding your perfect matches...</h2>
+                <p>Analyzing thousands of shelter pets to find your ideal companions</p>
+            </div>
+        </div>
+
+        <!-- Browse/Swipe Screen -->
+        <div id="browse-screen" class="screen">
+            <div id="pet-stack" class="pet-card-container">
+                <!-- Pet cards will be dynamically inserted here -->
+            </div>
+            <div class="action-buttons">
+                <button class="action-btn pass-btn" onclick="passPet()" aria-label="Pass on this pet">❌</button>
+                <button class="action-btn super-like-btn" onclick="superLikePet()" aria-label="Super like this pet">⭐</button>
+                <button class="action-btn like-btn" onclick="likePet()" aria-label="Like this pet">❤️</button>
+            </div>
+        </div>
+
+        <!-- Favorites Screen -->
+        <div id="favorites-screen" class="screen">
+            <h2 style="margin-bottom: 20px;">Your Favorite Pets</h2>
+            <div id="favorites-container" class="favorites-grid">
+                <!-- Favorite pets will be displayed here -->
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="navigation">
+            <button class="nav-btn" onclick="showScreen('browse-screen')" aria-label="Browse pets">🏠</button>
+            <button class="nav-btn" onclick="showScreen('favorites-screen')" aria-label="View favorites">❤️</button>
+            <button class="nav-btn" onclick="showScreen('welcome-screen')" aria-label="Home">👤</button>
+        </nav>
+    </div>
+
+    <script>
+        // App State
+        let currentScreen = 'welcome-screen';
+        let quizAnswers = {};
+        let currentQuestionIndex = 0;
+        let availablePets = [];
+        let currentPetIndex = 0;
+        let favoritePets = [];
+        let userPreferences = {};
+
+        // Quiz Questions
+        const quizQuestions = [
+            {
+                id: 'living_situation',
+                question: 'What\'s your living situation?',
+                options: [
+                    { id: 'apartment', text: '🏢 Apartment', weight: { small: 3, medium: 1, large: 0 } },
+                    { id: 'house_small', text: '🏠 House with small yard', weight: { small: 2, medium: 3, large: 1 } },
+                    { id: 'house_large', text: '🏡 House with large yard', weight: { small: 1, medium: 2, large: 3 } },
+                    { id: 'farm', text: '🌾 Farm/Rural property', weight: { small: 1, medium: 1, large: 3 } }
+                ]
+            },
+            {
+                id: 'activity_level',
+                question: 'How active are you?',
+                options: [
+                    { id: 'low', text: '😴 I prefer quiet activities', weight: { energyLevel: { low: 3, medium: 1, high: 0 } } },
+                    { id: 'moderate', text: '🚶 Moderately active', weight: { energyLevel: { low: 1, medium: 3, high: 1 } } },
+                    { id: 'high', text: '🏃 Very active, love outdoors', weight: { energyLevel: { low: 0, medium: 1, high: 3 } } },
+                    { id: 'variable', text: '🔄 It varies day to day', weight: { energyLevel: { low: 2, medium: 2, high: 2 } } }
+                ]
+            },
+            {
+                id: 'experience',
+                question: 'Your pet experience level?',
+                options: [
+                    { id: 'first_time', text: '🌱 First-time pet owner', weight: { difficulty: { easy: 3, medium: 1, hard: 0 } } },
+                    { id: 'some', text: '📚 Some experience', weight: { difficulty: { easy: 2, medium: 3, hard: 1 } } },
+                    { id: 'experienced', text: '🎓 Very experienced', weight: { difficulty: { easy: 1, medium: 2, hard: 3 } } },
+                    { id: 'expert', text: '🏆 Expert/Professional', weight: { difficulty: { easy: 1, medium: 1, hard: 3 } } }
+                ]
+            },
+            {
+                id: 'time_available',
+                question: 'How much time can you dedicate daily?',
+                options: [
+                    { id: 'minimal', text: '⏰ 1-2 hours', weight: { timeNeeds: { low: 3, medium: 1, high: 0 } } },
+                    { id: 'moderate', text: '🕐 3-5 hours', weight: { timeNeeds: { low: 2, medium: 3, high: 1 } } },
+                    { id: 'lots', text: '🕓 6+ hours', weight: { timeNeeds: { low: 1, medium: 2, high: 3 } } },
+                    { id: 'full_time', text: '🏠 I work from home', weight: { timeNeeds: { low: 1, medium: 1, high: 3 } } }
+                ]
+            },
+            {
+                id: 'pet_type',
+                question: 'What type of companion are you looking for?',
+                options: [
+                    { id: 'dog', text: '🐕 Dog', weight: { type: { dog: 3, cat: 0, rabbit: 0, bird: 0 } } },
+                    { id: 'cat', text: '🐱 Cat', weight: { type: { dog: 0, cat: 3, rabbit: 0, bird: 0 } } },
+                    { id: 'small_pet', text: '🐰 Small pet (rabbit, guinea pig)', weight: { type: { dog: 0, cat: 0, rabbit: 3, bird: 0 } } },
+                    { id: 'any', text: '🤗 I\'m open to any pet!', weight: { type: { dog: 2, cat: 2, rabbit: 2, bird: 2 } } }
+                ]
+            }
+        ];
+
+        // Sample Pet Data
+        const mockPets = [
+            {
+                id: 1,
+                name: "Luna",
+                type: "dog",
+                breed: "Golden Retriever Mix",
+                age: "2 years",
+                size: "medium",
+                energyLevel: "high",
+                difficulty: "easy",
+                timeNeeds: "medium",
+                personality: ["friendly", "playful", "loyal"],
+                photos: ["https://images.unsplash.com/photo-1552053831-71594a27632d?w=400&h=300&fit=crop"],
+                description: "Luna is a sweet, energetic golden retriever mix who loves playing fetch and meeting new friends. She's great with kids and other dogs!",
+                shelter: "Happy Tails Shelter",
+                location: { lat: 40.7128, lng: -74.0060 },
+                story: "Luna was found as a stray but has blossomed into the most loving companion. She dreams of a family to call her own.",
+                goodWith: ["kids", "dogs"],
+                specialNeeds: null
+            },
+            {
+                id: 2,
+                name: "Shadow",
+                type: "cat",
+                breed: "Domestic Shorthair",
+                age: "4 years",
+                size: "small",
+                energyLevel: "low",
+                difficulty: "easy",
+                timeNeeds: "low",
+                personality: ["calm", "independent", "affectionate"],
+                photos: ["https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&h=300&fit=crop"],
+                description: "Shadow is a calm, loving cat who enjoys quiet companionship and sunny windowsills. Perfect for a peaceful home.",
+                shelter: "Whiskers & Paws Rescue",
+                location: { lat: 40.7589, lng: -73.9851 },
+                story: "Shadow was surrendered when his elderly owner could no longer care for him. He's looking for a quiet retirement home.",
+                goodWith: ["adults"],
+                specialNeeds: null
+            },
+            {
+                id: 3,
+                name: "Buddy",
+                type: "dog",
+                breed: "Labrador Mix",
+                age: "5 years",
+                size: "large",
+                energyLevel: "medium",
+                difficulty: "easy",
+                timeNeeds: "medium",
+                personality: ["gentle", "patient", "loyal"],
+                photos: ["https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=300&fit=crop"],
+                description: "Buddy is a gentle giant who loves long walks and cozy evenings. He's great with children and very well-trained.",
+                shelter: "Second Chance Animal Rescue",
+                location: { lat: 40.6782, lng: -73.9442 },
+                story: "Buddy's family had to move and couldn't take him along. He's been waiting patiently for his forever family.",
+                goodWith: ["kids", "dogs", "cats"],
+                specialNeeds: null
+            },
+            {
+                id: 4,
+                name: "Whiskers",
+                type: "cat",
+                breed: "Maine Coon Mix",
+                age: "1 year",
+                size: "medium",
+                energyLevel: "high",
+                difficulty: "medium",
+                timeNeeds: "medium",
+                personality: ["playful", "curious", "social"],
+                photos: ["https://images.unsplash.com/photo-1571566882372-1598d88abd90?w=400&h=300&fit=crop"],
+                description: "Whiskers is a young, playful Maine Coon mix who loves interactive toys and climbing towers. Very social and vocal!",
+                shelter: "Feline Friends Sanctuary",
+                location: { lat: 40.7831, lng: -73.9712 },
+                story: "Whiskers was bottle-fed from birth and is now ready for his first real home. He loves attention and playtime.",
+                goodWith: ["cats", "older kids"],
+                specialNeeds: null
+            },
+            {
+                id: 5,
+                name: "Bella",
+                type: "dog",
+                breed: "Pit Bull Mix",
+                age: "3 years",
+                size: "medium",
+                energyLevel: "medium",
+                difficulty: "medium",
+                timeNeeds: "high",
+                personality: ["loyal", "protective", "loving"],
+                photos: ["https://images.unsplash.com/photo-1551717743-49959800b1f6?w=400&h=300&fit=crop"],
+                description: "Bella is a sweet, loyal companion who just wants to be loved. She's great with her family but needs proper introduction to new pets.",
+                shelter: "Paws & Hearts Rescue",
+                location: { lat: 40.7282, lng: -73.7949 },
+                story: "Bella was rescued from a difficult situation but has learned to trust again. She needs an experienced, loving family.",
+                goodWith: ["adults"],
+                specialNeeds: "Needs slow introduction to other pets"
+            },
+            {
+                id: 6,
+                name: "Coco",
+                type: "rabbit",
+                breed: "Holland Lop",
+                age: "2 years",
+                size: "small",
+                energyLevel: "low",
+                difficulty: "easy",
+                timeNeeds: "low",
+                personality: ["gentle", "quiet", "sweet"],
+                photos: ["https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?w=400&h=300&fit=crop"],
+                description: "Coco is a gentle Holland Lop rabbit who loves hay and quiet companionship. Perfect for apartment living!",
+                shelter: "Small Paws Sanctuary",
+                location: { lat: 40.7505, lng: -73.9934 },
+                story: "Coco was surrendered when her family discovered allergies. She's litter trained and very well-behaved.",
+                goodWith: ["adults", "quiet homes"],
+                specialNeeds: null
+            }
+        ];
+
+        // Utility Functions
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+            currentScreen = screenId;
+            
+            // Update navigation active state
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            if (screenId === 'browse-screen') {
+                document.querySelector('.nav-btn[onclick*="browse-screen"]').classList.add('active');
+            } else if (screenId === 'favorites-screen') {
+                document.querySelector('.nav-btn[onclick*="favorites-screen"]').classList.add('active');
+            } else if (screenId === 'welcome-screen') {
+                document.querySelector('.nav-btn[onclick*="welcome-screen"]').classList.add('active');
+            }
+        }
+
+        function startQuiz() {
+            showScreen('quiz-screen');
+            currentQuestionIndex = 0;
+            quizAnswers = {};
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            const question = quizQuestions[currentQuestionIndex];
+            const container = document.getElementById('quiz-container');
+            
+            container.innerHTML = `
+                <div class="quiz-question">
+                    <h2 class="question-title">${question.question}</h2>
+                    <div class="quiz-options">
+                        ${question.options.map(option => `
+                            <div class="quiz-option" onclick="selectOption('${question.id}', '${option.id}', this)" data-option="${option.id}">
+                                ${option.text}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function selectOption(questionId, optionId, element) {
+            // Remove previous selections
+            element.parentNode.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Select current option
+            element.classList.add('selected');
+            quizAnswers[questionId] = optionId;
+            
+            // Show next button
+            const nextBtn = document.getElementById('quiz-next-btn');
+            const finishBtn = document.getElementById('quiz-finish-btn');
+            
+            if (currentQuestionIndex < quizQuestions.length - 1) {
+                nextBtn.style.display = 'block';
+                finishBtn.style.display = 'none';
+            } else {
+                nextBtn.style.display = 'none';
+                finishBtn.style.display = 'block';
+            }
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            displayQuestion();
+            document.getElementById('quiz-next-btn').style.display = 'none';
+        }
+
+        function finishQuiz() {
+            // Calculate user preferences from quiz answers
+            userPreferences = calculatePreferences(quizAnswers);
+            
+            // Show loading screen
+            showScreen('loading-screen');
+            
+            // Simulate matching process
+            setTimeout(() => {
+                generateMatches();
+                showScreen('browse-screen');
+                loadNextPet();
+            }, 2000);
+        }
+
+        function calculatePreferences(answers) {
+            const preferences = {
+                livingSpace: answers.living_situation,
+                activityLevel: answers.activity_level,
+                experience: answers.experience,
+                timeAvailable: answers.time_available,
+                petType: answers.pet_type
+            };
+            
+            return preferences;
+        }
+
+        function generateMatches() {
+            // Score each pet based on user preferences
+            availablePets = mockPets.map(pet => {
+                const score = calculateCompatibilityScore(pet, userPreferences);
+                return { ...pet, matchScore: score };
+            }).sort((a, b) => b.matchScore - a.matchScore);
+            
+            currentPetIndex = 0;
+        }
+
+        function calculateCompatibilityScore(pet, preferences) {
+            let score = 50; // Base score
+            
+            // Size compatibility based on living situation
+            if (preferences.livingSpace === 'apartment' && pet.size === 'small') score += 20;
+            if (preferences.livingSpace === 'house_large' && pet.size === 'large') score += 15;
+            if (preferences.livingSpace === 'apartment' && pet.size === 'large') score -= 20;
+            
+            // Activity level matching
+            if (preferences.activityLevel === 'low' && pet.energyLevel === 'low') score += 20;
+            if (preferences.activityLevel === 'high' && pet.energyLevel === 'high') score += 20;
+            if (preferences.activityLevel === 'moderate' && pet.energyLevel === 'medium') score += 15;
+            
+            // Experience level matching
+            if (preferences.experience === 'first_time' && pet.difficulty === 'easy') score += 15;
+            if (preferences.experience === 'experienced' && pet.difficulty === 'hard') score += 10;
+            
+            // Time availability matching
+            if (preferences.timeAvailable === 'minimal' && pet.timeNeeds === 'low') score += 15;
+            if (preferences.timeAvailable === 'lots' && pet.timeNeeds === 'high') score += 15;
+            
+            // Pet type preference
+            if (preferences.petType === pet.type) score += 25;
+            if (preferences.petType === 'any') score += 10;
+            
+            // Ensure score is between 0-100
+            return Math.max(0, Math.min(100, score));
+        }
+
+        function loadNextPet() {
+            const petStack = document.getElementById('pet-stack');
+            
+            if (currentPetIndex >= availablePets.length) {
+                // No more pets
+                petStack.innerHTML = `
+                    <div class="empty-state">
+                        <span class="empty-emoji">🎉</span>
+                        <h3>You've seen all available pets!</h3>
+                        <p>Check your favorites or start over with new preferences.</p>
+                        <button class="btn" onclick="showScreen('favorites-screen')">View Favorites</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            const pet = availablePets[currentPetIndex];
+            
+            petStack.innerHTML = `
+                <div class="pet-card" id="current-pet-card">
+                    <img src="${pet.photos[0]}" alt="${pet.name}" class="pet-image" onerror="this.src='data:image/svg+xml,<svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 400 300\\'><rect width=\\'400\\' height=\\'300\\' fill=\\'%23f0f0f0\\'/><text x=\\'200\\' y=\\'150\\' text-anchor=\\'middle\\' fill=\\'%23666\\' font-size=\\'48\\'>🐾</text></svg>'">
+                    <div class="pet-info">
+                        <div class="match-score">${pet.matchScore}% Match</div>
+                        <h3 class="pet-name">${pet.name}</h3>
+                        <div class="pet-details">${pet.breed} • ${pet.age} • ${pet.size}</div>
+                        <div class="pet-traits">
+                            ${pet.personality.map(trait => `<span class="trait-tag">${trait}</span>`).join('')}
+                        </div>
+                        <p class="pet-description">${pet.description}</p>
+                        ${pet.specialNeeds ? `<div style="background: #FFF3E0; padding: 8px 12px; border-radius: 8px; margin: 8px 0; font-size: 0.9rem;"><strong>Special Notes:</strong> ${pet.specialNeeds}</div>` : ''}
+                        <div style="margin-top: 12px; font-size: 0.9rem; color: var(--text-light);">
+                            📍 ${pet.shelter}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add swipe functionality
+            addSwipeListeners();
+        }
+
+        function addSwipeListeners() {
+            const card = document.getElementById('current-pet-card');
+            if (!card) return;
+            
+            let startX = 0;
+            let currentX = 0;
+            let isDragging = false;
+            
+            // Mouse events
+            card.addEventListener('mousedown', handleStart);
+            document.addEventListener('mousemove', handleMove);
+            document.addEventListener('mouseup', handleEnd);
+            
+            // Touch events
+            card.addEventListener('touchstart', handleStart);
+            document.addEventListener('touchmove', handleMove);
+            document.addEventListener('touchend', handleEnd);
+            
+            function handleStart(e) {
+                isDragging = true;
+                card.classList.add('dragging');
+                startX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX;
+                card.style.transition = 'none';
+            }
+            
+            function handleMove(e) {
+                if (!isDragging) return;
+                
+                e.preventDefault();
+                currentX = (e.type === 'mousemove' ? e.clientX : e.touches[0].clientX) - startX;
+                
+                const rotation = currentX * 0.1;
+                card.style.transform = `translateX(${currentX}px) rotate(${rotation}deg)`;
+                
+                // Add visual feedback
+                if (currentX > 50) {
+                    card.style.borderColor = 'var(--soft-green)';
+                } else if (currentX < -50) {
+                    card.style.borderColor = 'var(--primary-color)';
+                } else {
+                    card.style.borderColor = 'transparent';
+                }
+            }
+            
+            function handleEnd() {
+                if (!isDragging) return;
+                isDragging = false;
+                card.classList.remove('dragging');
+                card.style.transition = 'transform 0.3s ease';
+                
+                if (currentX > 100) {
+                    // Swiped right - like
+                    likePet();
+                } else if (currentX < -100) {
+                    // Swiped left - pass
+                    passPet();
+                } else {
+                    // Return to center
+                    card.style.transform = 'translateX(0) rotate(0deg)';
+                    card.style.borderColor = 'transparent';
+                }
+                
+                currentX = 0;
+            }
+        }
+
+        function likePet() {
+            if (currentPetIndex >= availablePets.length) return;
+            
+            const pet = availablePets[currentPetIndex];
+            addToFavorites(pet);
+            nextPet('like');
+        }
+
+        function passPet() {
+            nextPet('pass');
+        }
+
+        function superLikePet() {
+            if (currentPetIndex >= availablePets.length) return;
+            
+            const pet = availablePets[currentPetIndex];
+            pet.superLiked = true;
+            addToFavorites(pet);
+            nextPet('super-like');
+        }
+
+        function nextPet(action) {
+            const card = document.getElementById('current-pet-card');
+            if (!card) return;
+            
+            // Animate card exit
+            let exitDirection = '100vw';
+            if (action === 'pass') exitDirection = '-100vw';
+            
+            card.style.transform = `translateX(${exitDirection}) rotate(${action === 'pass' ? '-30deg' : '30deg'})`;
+            card.style.opacity = '0';
+            
+            setTimeout(() => {
+                currentPetIndex++;
+                loadNextPet();
+            }, 300);
+        }
+
+        function addToFavorites(pet) {
+            if (!favoritePets.find(fav => fav.id === pet.id)) {
+                favoritePets.push(pet);
+                updateFavoritesDisplay();
+                
+                // Show brief feedback
+                showNotification(`${pet.name} added to favorites! ${pet.superLiked ? '⭐' : '❤️'}`);
+            }
+        }
+
+        function updateFavoritesDisplay() {
+            const container = document.getElementById('favorites-container');
+            
+            if (favoritePets.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <span class="empty-emoji">💙</span>
+                        <h3>No favorites yet</h3>
+                        <p>Like some pets to see them here!</p>
+                        <button class="btn" onclick="showScreen('browse-screen')">Start Browsing</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = favoritePets.map(pet => `
+                <div class="favorite-card" onclick="showPetDetails(${pet.id})">
+                    <img src="${pet.photos[0]}" alt="${pet.name}" class="favorite-image" onerror="this.src='data:image/svg+xml,<svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 150 120\\'><rect width=\\'150\\' height=\\'120\\' fill=\\'%23f0f0f0\\'/><text x=\\'75\\' y=\\'60\\' text-anchor=\\'middle\\' fill=\\'%23666\\' font-size=\\'24\\'>🐾</text></svg>'">
+                    <div class="favorite-info">
+                        <div class="favorite-name">${pet.name} ${pet.superLiked ? '⭐' : ''}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-light);">${pet.breed}</div>
+                        <div style="font-size: 0.8rem; color: var(--soft-green); font-weight: 600;">${pet.matchScore}% Match</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showPetDetails(petId) {
+            const pet = favoritePets.find(p => p.id === petId);
+            if (!pet) return;
+            
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000;
+                padding: 20px;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: white; border-radius: var(--border-radius); max-width: 400px; width: 100%; max-height: 80vh; overflow-y: auto;">
+                    <div style="position: relative;">
+                        <img src="${pet.photos[0]}" alt="${pet.name}" style="width: 100%; height: 250px; object-fit: cover; border-radius: var(--border-radius) var(--border-radius) 0 0;">
+                        <button onclick="this.closest('.modal').remove()" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer;">✕</button>
+                    </div>
+                    <div style="padding: 20px;">
+                        <div class="match-score">${pet.matchScore}% Match ${pet.superLiked ? '⭐' : ''}</div>
+                        <h2>${pet.name}</h2>
+                        <p style="color: var(--text-light); margin-bottom: 16px;">${pet.breed} • ${pet.age} • ${capitalize(pet.size)}</p>
+                        <div class="pet-traits" style="margin-bottom: 16px;">
+                            ${pet.personality.map(trait => `<span class="trait-tag">${trait}</span>`).join('')}
+                        </div>
+                        <p style="margin-bottom: 16px;">${pet.description}</p>
+                        ${pet.story ? `<div style="background: #F8F9FA; padding: 16px; border-radius: 8px; margin-bottom: 16px;"><strong>My Story:</strong><br>${pet.story}</div>` : ''}
+                        ${pet.specialNeeds ? `<div style="background: #FFF3E0; padding: 12px; border-radius: 8px; margin-bottom: 16px;"><strong>Special Notes:</strong><br>${pet.specialNeeds}</div>` : ''}
+                        <div style="margin-bottom: 16px;">
+                            <strong>Good with:</strong> ${pet.goodWith.join(', ')}
+                        </div>
+                        <div style="margin-bottom: 20px; padding: 12px; background: var(--background); border-radius: 8px;">
+                            <strong>📍 ${pet.shelter}</strong><br>
+                            <small style="color: var(--text-light);">Contact shelter for adoption information</small>
+                        </div>
+                        <button class="btn" onclick="contactShelter('${pet.shelter}', '${pet.name}')">Contact Shelter</button>
+                        <button class="btn secondary" onclick="removeFromFavorites(${pet.id}); this.closest('.modal').remove();" style="margin-top: 8px;">Remove from Favorites</button>
+                    </div>
+                </div>
+            `;
+            
+            modal.className = 'modal';
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.remove();
+            });
+            
+            document.body.appendChild(modal);
+        }
+
+        function removeFromFavorites(petId) {
+            favoritePets = favoritePets.filter(pet => pet.id !== petId);
+            updateFavoritesDisplay();
+            showNotification('Removed from favorites');
+        }
+
+        function contactShelter(shelterName, petName) {
+            showNotification(`Opening contact info for ${shelterName} about ${petName}...`);
+            // In a real app, this would open contact details or phone dialer
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: var(--text-dark);
+                color: white;
+                padding: 12px 20px;
+                border-radius: 25px;
+                z-index: 1001;
+                font-size: 0.9rem;
+                box-shadow: var(--card-shadow);
+                animation: slideDown 0.3s ease;
+            `;
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideUp 0.3s ease forwards';
+                setTimeout(() => notification.remove(), 300);
+            }, 2000);
+        }
+
+        function capitalize(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load favorites from localStorage if available (fallback for demo)
+            try {
+                const saved = localStorage.getItem('pawmatch-favorites');
+                if (saved) {
+                    favoritePets = JSON.parse(saved);
+                    updateFavoritesDisplay();
+                }
+            } catch (e) {
+                // localStorage not available, continue with empty favorites
+            }
+            
+            // Add CSS animations
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideDown {
+                    from { transform: translateX(-50%) translateY(-100%); opacity: 0; }
+                    to { transform: translateX(-50%) translateY(0); opacity: 1; }
+                }
+                @keyframes slideUp {
+                    from { transform: translateX(-50%) translateY(0); opacity: 1; }
+                    to { transform: translateX(-50%) translateY(-100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Initialize with sample data for demo
+            generateMatches();
+        });
+
+        // Save favorites when app closes (if localStorage available)
+        window.addEventListener('beforeunload', function() {
+            try {
+                localStorage.setItem('pawmatch-favorites', JSON.stringify(favoritePets));
+            } catch (e) {
+                // localStorage not available
+            }
+        });
+
+        // Service Worker Registration for PWA (optional)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                    console.log('ServiceWorker registration successful');
+                }, function(err) {
+                    console.log('ServiceWorker registration failed');
+                });
+            });
+        }
+    </script>
+</body>
+</html>
